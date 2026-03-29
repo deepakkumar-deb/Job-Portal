@@ -229,6 +229,7 @@ class AccountController extends Controller
                 'title' => $request->title,
                 'category_id' => $request->category,
                 'job_type_id' => $request->job_nature,
+                'user_id' => Auth::user()->id,
                 'vacancy' => $request->vacancy,
                 'salary' => $request->salary,
                 'location' => $request->location,
@@ -239,8 +240,6 @@ class AccountController extends Controller
                 'company_location' => $request->company_location,
                 'company_website' => $request->website,
             ]);
-
-            session()->flash('success', 'Job posted successfully!');
 
             return response()->json([
                 'status' => true,
@@ -256,7 +255,10 @@ class AccountController extends Controller
 
     public function myJobs()
     {
-        // Logic to retrieve and display the user's job postings will go here
-        return view('front.account.job.my_jobs');
+        $jobs = Job::where('user_id', Auth::id())->with('jobType', 'category')->latest()->paginate(10);
+            // dd($jobs);
+
+        return view('front.account.job.my_jobs', compact('jobs'));
     }
+
 }

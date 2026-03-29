@@ -12,6 +12,7 @@ class Job extends Model
         'title',
         'category_id',
         'job_type_id',
+        'user_id',
         'vacancy',
         'salary',
         'location',
@@ -22,4 +23,14 @@ class Job extends Model
         'company_location',
         'company_website'
     ];
+
+    public function jobType()
+    {
+        return $this->belongsTo(JobType::class);
+    }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+    
 }

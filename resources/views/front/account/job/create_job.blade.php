@@ -159,8 +159,8 @@
                                 ${response.message}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                        `);
-                        
+                        `);            
+
                         window.location.href = "{{ route('account.myJobs') }}";
                     } else {
                         var errors = response.errors;
