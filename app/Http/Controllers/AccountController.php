@@ -261,4 +261,85 @@ class AccountController extends Controller
         return view('front.account.job.my_jobs', compact('jobs'));
     }
 
+    public function editJob(Request $request, $id)
+    {
+        
+        $job = Job::where([
+            'id' => $id,
+            'user_id' => Auth::id()
+        ])->firstOrFail();
+
+        $categories = Category::orderBy('name', 'ASC')->where('status', 1)->get();
+        $job_types = JobType::orderBy('id', 'ASC')->where('status', 1)->get();
+
+        return view('front.account.job.edit_job', compact('job', 'categories', 'job_types'));
+    }
+
+    public function updateJob(Request $request, $id)
+    {
+        $job = Job::where([
+            'id' => $id,
+            'user_id' => Auth::id()
+        ])->firstOrFail();
+
+        // Validation and updating logic for the job posting will go here
+        $rules = [
+            'title' => 'required|string|max:255',
+            'category' => 'required|exists:categories,id',
+            'job_nature' => 'required|exists:job_types,id',
+            'vacancy' => 'required|integer|min:1',
+            'salary' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'description' => 'required|string',
+            'company_name' => 'required|string|max:255',
+            'company_location' => 'nullable|string|max:255',
+            'website' => 'nullable|url'
+        ];       
+        
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->passes()) {
+
+            $job->update([
+                'title' => $request->title,
+                'category_id' => $request->category,
+                'job_type_id' => $request->job_nature,
+                'vacancy' => $request->vacancy,
+                'salary' => $request->salary,
+                'location' => $request->location,
+                'description' => $request->description,
+                'qualifications' => $request->qualifications,
+                'experience' => $request->experience,
+                'company_name' => $request->company_name,
+                'company_location' => $request->company_location,
+                'company_website' => $request->website,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Job updated successfully!'
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+    }
+
+    public function deleteJob(Request $request)
+    {
+        $job = Job::where([
+            'id' => $request->job_id,
+            'user_id' => Auth::id()
+        ])->firstOrFail();
+
+        $job->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Job deleted successfully!'
+        ]);
+    }
+
 }
