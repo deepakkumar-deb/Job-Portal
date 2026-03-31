@@ -21,7 +21,9 @@ class Job extends Model
         'experience',
         'company_name',
         'company_location',
-        'company_website'
+        'company_website',
+        'status',
+        'is_featured',
     ];
 
     public function jobType()

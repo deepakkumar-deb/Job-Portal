@@ -24,13 +24,15 @@ class JobFactory extends Factory
             'category_id' => rand(1, 5),
             'vacancy' => rand(1, 50),
             'salary' => fake()->randomElement(['Negotiable', '5000-10000', '10000-20000', '20000-50000', '50000+']),
-            'company_website' => fake()->url,
-            'company_location' => fake()->city,
             'qualifications' => fake()->sentence,
             'location' => fake()->city,
             'description' => fake()->text,
             'experience' => fake()->sentence,
             'company_name' => fake()->name,
+            'company_website' => fake()->url,
+            'company_location' => fake()->city,
+            'status' =>1,
+            'is_featured' => fake()->randomElement([0, 1]),
         ];
     }
 }
