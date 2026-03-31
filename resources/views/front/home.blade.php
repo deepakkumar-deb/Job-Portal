@@ -96,7 +96,7 @@
                                     </div>
 
                                     <div class="d-grid mt-3">
-                                        <a href="job-detail.html" class="btn btn-primary btn-lg">Details</a>
+                                        <a href="{{ route('job.details', $job->id) }}" class="btn btn-primary btn-lg">Details</a>
                                     </div>
                                 </div>
                             </div>
@@ -143,7 +143,7 @@
                                     </div>
 
                                     <div class="d-grid mt-3">
-                                        <a href="job-detail.html" class="btn btn-primary btn-lg">Details</a>
+                                        <a href="{{ route('job.details', $job->id) }}" class="btn btn-primary btn-lg">Details</a>
                                     </div>
                                 </div>
                             </div>

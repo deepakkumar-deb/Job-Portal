@@ -10,9 +10,10 @@
             </div>
             <div class="col-6 col-md-2">
                 <div class="align-end">
+                    <label for="sort">Sort By:</label>
                     <select name="sort" id="sort" class="form-control">
-                        <option value="">Latest</option>
-                        <option value="">Oldest</option>
+                        <option name="sort" value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
+                        <option name="sort" value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
                     </select>
                 </div>
             </div>
@@ -25,7 +26,7 @@
                 <div class="card border-0 shadow p-4">
                     <div class="mb-4">
                         <h2>Location</h2>
-                        <input type="text" name="location" placeholder="Location" class="form-control">
+                        <input type="text" id="location" name="location" placeholder="Location" class="form-control">
                     </div>
 
                     <div class="mb-4">
@@ -49,14 +50,17 @@
                         @if ($jobTypes->isNotEmpty())
                             @foreach ($jobTypes as $jobType)
                                 <div class="form-check mb-2"> 
-                                    <input class="form-check-input " name="job_type" type="checkbox" value="{{ $jobType->id }}" id="job-Type-{{ $jobType->id }}">    
+                                    <input {{ in_array($jobType->id, $jobTypeArr) ? 'checked' : '' }} class="form-check-input " name="job_type" type="checkbox" value="{{ $jobType->id }}" id="job-Type-{{ $jobType->id }}">    
                                     <label class="form-check-label " for="job-Type-{{ $jobType->id }}">{{ $jobType->name }}</label>
                                 </div>
                             @endforeach
                         @endif
                     </div>
-
-                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+                <button type="button" id="reset" class="btn btn-secondary mt-3">
+                    Reset
+                </button>
+            </div>
                 </form>
             </div>
             <div class="col-md-8 col-lg-9 ">
@@ -76,6 +80,10 @@
                                                 <span class="ps-1">{{ $job->location }}</span>
                                             </p>
                                             <p class="mb-0">
+                                                <span class="fw-bolder"><i class="fa fa-briefcase"></i></span>
+                                                <span class="ps-1">{{ $job->category->name }}</span>
+                                            </p>
+                                            <p class="mb-0">
                                                 <span class="fw-bolder"><i class="fa fa-clock-o"></i></span>
                                                 <span class="ps-1">{{ $job->jobType->name }}</span>
                                             </p>
@@ -86,7 +94,7 @@
                                         </div>
 
                                         <div class="d-grid mt-3">
-                                            <a href="job-detail.html" class="btn btn-primary btn-lg">Details</a>
+                                            <a href="{{ route('job.details', $job->id) }}" class="btn btn-primary btn-lg">Details</a>
                                     </div>
                                     </div>
                                 </div>
@@ -110,5 +118,45 @@
 @endsection
 
 @section('customJS')
+    <script>
+        $('#searchForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            var url = "{{ route('jobs') }}";
+            var params = [];
+            
+            var location = $('#location').val();
+            if(location != "") {
+                params.push('location=' + encodeURIComponent(location));
+            }
+            
+            var category = $('#category').val();
+            if(category != "") {
+                params.push('category=' + category);
+            }
+            
+            var jobTypes = [];
+            $('input[name="job_type"]:checked').each(function() {
+                jobTypes.push($(this).val());
+            });
+            if(jobTypes.length > 0) {
+                params.push('job_type=' + jobTypes.join(','));
+            }
+            
+            if(params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            
+            var $sort = $('#sort').val();
+            if($sort != "") {
+                url += (params.length > 0 ? '&' : '?') + 'sort=' + $sort;
+            }
+            window.location.href = url;
+        });
+
+        $('#reset').on('click', function() {
+            window.location.href = "{{ route('jobs') }}";
+        });
+    </script>
 
 @endsection
