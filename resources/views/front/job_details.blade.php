@@ -16,6 +16,9 @@
     <div class="container job_details_area">
         <div class="row pb-5">
             <div class="col-md-8">
+
+                @include('front.layouts.message')
+
                 <div class="card shadow border-0">
                     <div class="job_details_header">
                         <div class="single_jobs white-bg d-flex justify-content-between">
@@ -63,7 +66,11 @@
                         <div class="border-bottom"></div>
                         <div class="pt-3 text-end">
                             <a href="#" class="btn btn-secondary">Save</a>
-                            <a href="#" class="btn btn-primary">Apply</a>
+                            @if(Auth::check())
+                                <a href="javascript:void(0)" onclick="applyJob(event, {{ $job->id }})" class="btn btn-primary">Apply</a>
+                            @else
+                                <a href="{{ route('account.login') }}" class="btn btn-primary">Apply</a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -117,5 +124,33 @@
 @endsection
 
 @section('customJS')
+<script type="text/javascript">
+function applyJob(event, jobId) {
 
+    event.preventDefault();
+
+    if(confirm('Are you sure you want to apply for this job?')) {
+        $.ajax({
+            url: '{{ route("applyJob") }}',
+            method: 'POST',
+            data: {
+                job_id:jobId,
+                 _token: '{{ csrf_token() }}' },
+            dataType: 'json',
+            success: function(response) {
+                if(response.status) {
+                    alert(response.message);
+                    window.location.href = "{{ route('account.myJobApplications') }}";
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+                alert('Server Error. Please try again later.');
+            }
+        });
+    }
+}
+</script>
 @endsection

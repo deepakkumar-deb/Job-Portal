@@ -13,6 +13,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs');
 Route::get('/jobs/details/{id}', [JobController::class, 'details'])->name('job.details');
+Route::post('/apply-job', [JobController::class, 'applyJob'])->name('applyJob');
 
 Route::prefix('account')->group(function () {
 
@@ -36,6 +37,8 @@ Route::prefix('account')->group(function () {
         Route::get('/my-jobs/edit/{jobId}', [AccountController::class, 'editJob'])->name('account.editJob');
         Route::post('/my-jobs/update/{jobId}', [AccountController::class, 'updateJob'])->name('account.updateJob');
         Route::post('/my-jobs/delete', [AccountController::class, 'deleteJob'])->name('account.deleteJob');
+        Route::get('/my-applications', [AccountController::class, 'myJobApplications'])->name('account.myJobApplications');
+        Route::post('/remove-job-applications', [AccountController::class, 'removeJobs'])->name('account.removeJobs');
 
 });
 

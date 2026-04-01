@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Category;
-use App\Models\JobType;
 use App\Models\Job;
+use App\Models\JobApplication;
+use App\Models\JobType;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Intervention\Image\ImageManager;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class AccountController extends Controller
 {
@@ -256,14 +257,14 @@ class AccountController extends Controller
     public function myJobs()
     {
         $jobs = Job::where('user_id', Auth::id())->with('jobType', 'category')->latest()->paginate(10);
-            // dd($jobs);
+        // dd($jobs);
 
         return view('front.account.job.my_jobs', compact('jobs'));
     }
 
     public function editJob(Request $request, $id)
     {
-        
+
         $job = Job::where([
             'id' => $id,
             'user_id' => Auth::id()
@@ -294,8 +295,8 @@ class AccountController extends Controller
             'company_name' => 'required|string|max:255',
             'company_location' => 'nullable|string|max:255',
             'website' => 'nullable|url'
-        ];       
-        
+        ];
+
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->passes()) {
@@ -342,4 +343,29 @@ class AccountController extends Controller
         ]);
     }
 
+    public function myJobApplications()
+    {
+        $applications = JobApplication::where('user_id', Auth::id())
+            ->with(['job' => function ($q) {
+                $q->withCount('applications as applicants_count')->with('jobType');
+            }])
+            ->latest()
+            ->paginate(10);
+
+        return view('front.account.job.my_applications', compact('applications'));
+    }
+
+
+    public function removeJobs(Request $request)
+    {
+        $jobApplication = JobApplication::where([
+            'id'      => $request->application_id,
+            'user_id' => Auth::id()
+        ])->firstOrFail(); // throws 404 automatically if not found
+
+        $jobApplication->delete();
+
+        session()->flash('success', 'Job application removed successfully.');
+        return response()->json(['status' => true]);
+    }
 }

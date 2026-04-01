@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\JobNotificationEmail;
 use App\Models\Category;
-use Illuminate\Http\Request;
 use App\Models\Job;
+use App\Models\JobApplication;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class JobController extends Controller
 {
@@ -28,14 +33,13 @@ class JobController extends Controller
             $jobTypeArr = explode(',', request()->job_type);
             $jobs = $jobs->whereIn('job_type_id', $jobTypeArr);
         }
-        
-        if (request('sort') == 'oldest') {
-            $jobs->orderBy('created_at', 'asc'); // Oldest
-        } else {
-            $jobs->orderBy('created_at', 'desc'); // Latest (default)
-        }
-        $jobs = $jobs->orderBy('created_at', 'desc')->with('jobType')->paginate(9);
 
+        if (request('sort') == 'oldest') {
+            $jobs = $jobs->orderBy('created_at', 'asc');
+        } else {
+            $jobs = $jobs->orderBy('created_at', 'desc');
+        }
+        $jobs = $jobs->with('jobType')->paginate(9);
 
         return view('front.jobs', compact('categories', 'jobTypes', 'jobs', 'jobTypeArr'));
     }
@@ -44,5 +48,67 @@ class JobController extends Controller
     {
         $job = Job::where('id', $id)->where('status', 1)->with('category', 'jobType')->firstOrFail();
         return view('front.job_details', compact('job'));
+    }
+
+    public function applyJob(Request $request)
+    {
+        $id = $request->job_id;
+
+        $job = Job::where('id', $id)->where('status', 1)->first();
+
+        if (!$job) {
+            $msg = 'Job does not exist';
+            return response()->json([
+                'status' => false,
+                'message' => $msg
+            ]);
+        }
+
+        // cannot apply to own job
+        if ($job->user_id === Auth::id()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You cannot apply for your own job'
+            ]);
+        }
+
+        // ❗ check already applied (FIXED)
+        $alreadyApplied = JobApplication::where([
+            'job_id' => $id,
+            'user_id' => Auth::id()
+        ])->exists();
+
+        if ($alreadyApplied) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You already applied for this job'
+            ]);
+        }
+
+        // create new application
+        JobApplication::create([
+            'job_id' => $id,
+            'user_id' => Auth::id(),
+            'employer_id' => $job->user_id,
+            'applied_date' => now()
+        ]);
+
+        
+
+        //send email to employer about new application (optional)
+        $employer = User::where('id', $job->user_id)->first();
+        $maildata = [
+            'employer' => $employer,
+            'job' => $job,
+            'user' => Auth::user(),
+            'applicant_email' => Auth::user()->email,
+        ];
+        Mail::to($employer->email)->send(new JobNotificationEmail($maildata));
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Job application submitted successfully'
+        ]);
+        
     }
 }
