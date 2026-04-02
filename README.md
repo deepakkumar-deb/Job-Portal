@@ -27,7 +27,7 @@ A Laravel 12 based job portal where employers can post jobs and job seekers can 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|-------|------------|
 | Language | PHP 8.2+ |
 | Framework | Laravel 12 |
 | Database | MySQL |
@@ -148,7 +148,7 @@ MAIL_FROM_NAME="Job Portal"
 
 > For local testing, [Mailtrap](https://mailtrap.io) or `log` mailer is recommended.
 >
-> To use log mailer: set `MAIL_MAILER=log` — emails will appear in `storage/logs/laravel.log`.
+> To use log mailer: set `MAIL_MAILER=log` — emails appear in `storage/logs/laravel.log`.
 
 ---
 
@@ -160,7 +160,7 @@ The Composer dev script starts a queue worker automatically:
 php artisan queue:listen --tries=1 --timeout=0
 ```
 
-If you run the server manually, start the queue worker separately:
+If running the server manually, start the queue worker separately:
 
 ```bash
 php artisan queue:work
@@ -171,36 +171,99 @@ php artisan queue:work
 ## Project Structure
 
 ```
-job-portal/
+job_portal/
+├── artisan                          # Laravel CLI tool
+├── composer.json                    # PHP dependencies
+├── package.json                     # Node dependencies
+├── phpunit.xml                      # PHPUnit configuration
+├── vite.config.js                   # Vite build configuration
+│
 ├── app/
 │   ├── Http/
 │   │   └── Controllers/
-│   │       ├── AccountController.php   # Auth, profile, dashboard actions
-│   │       ├── JobController.php       # Browse, apply, save jobs
-│   │       └── HomeController.php      # Homepage
-│   └── Models/
-│       ├── User.php
-│       ├── Job.php
-│       ├── Category.php
-│       ├── JobType.php
-│       ├── JobApplication.php
-│       └── SavedJobs.php
-├── resources/
+│   ├── Mail/
+│   │   └── JobNotificationEmail.php
+│   ├── Models/
+│   │   ├── Category.php
+│   │   ├── Job.php
+│   │   ├── JobApplication.php
+│   │   ├── JobType.php
+│   │   ├── SavedJobs.php
+│   │   └── User.php
+│   └── Providers/
+│       └── AppServiceProvider.php
+│
+├── bootstrap/
+│   ├── app.php
+│   ├── providers.php
+│   └── cache/
+│
+├── config/                          # Configuration files
+│   ├── app.php
+│   ├── auth.php
+│   ├── cache.php
+│   ├── database.php
+│   ├── filesystems.php
+│   ├── logging.php
+│   ├── mail.php
+│   ├── queue.php
+│   ├── services.php
+│   └── session.php
+│
+├── database/
+│   ├── factories/                   # Model factories for testing
+│   │   ├── CategoryFactory.php
+│   │   ├── JobFactory.php
+│   │   ├── JobTypeFactory.php
+│   │   └── UserFactory.php
+│   ├── migrations/                  # Database migrations
+│   │   ├── 0001_01_01_000000_create_users_table.php
+│   │   ├── 0001_01_01_000001_create_cache_table.php
+│   │   ├── 2026_03_26_180801_add_profile_picture_to_users_table.php
+│   │   ├── 2026_03_26_184129_create_categories_table.php
+│   │   ├── 2026_03_26_184201_create_job_types_table.php
+│   │   ├── 2026_03_31_090648_create_jobs_table.php
+│   │   ├── 2026_04_01_085140_create_job_applications_table.php
+│   │   └── 2026_04_02_085237_create_saved_jobs_table.php
+│   └── seeders/
+│       └── DatabaseSeeder.php
+│
+├── public/                          # Public root directory
+│   ├── index.php
+│   ├── robots.txt
+│   ├── assets/
+│   │   ├── css/
+│   │   ├── fonts/
+│   │   ├── images/
+│   │   └── js/
+│   └── profile_pictures/
+│       └── thumb/
+│
+├── resources/                       # Frontend resources
+│   ├── css/
+│   │   └── app.css
+│   ├── js/
+│   │   ├── app.js
+│   │   └── bootstrap.js
 │   └── views/
+│       ├── welcome.blade.php
+│       ├── emails/
 │       └── front/
-│           ├── home.blade.php
-│           ├── jobs.blade.php
-│           ├── account/
-│           │   ├── profile.blade.php
-│           │   ├── login.blade.php
-│           │   ├── registration.blade.php
-│           │   └── job/
-│           └── emails/             # Email templates
+│
 ├── routes/
+│   ├── console.php
 │   └── web.php
-└── public/
-    └── profile_pictures/
-        └── thumb/
+│
+├── storage/                         # Application storage
+│   ├── app/
+│   ├── framework/
+│   └── logs/
+│
+├── tests/                           # Test files
+│   ├── Feature/
+│   └── Unit/
+│
+└── vendor/                          # Composer packages
 ```
 
 ---
@@ -209,29 +272,59 @@ job-portal/
 
 ### Public Routes
 
-| Method | URI | Description |
-|--------|-----|-------------|
-| GET | `/` | Homepage |
-| GET | `/jobs` | Job listings with filters |
-| GET | `/jobs/details/{id}` | Job detail page |
-| POST | `/apply-job` | Apply for a job |
-| POST | `/save-job` | Save a job |
+| Method | URI | Controller | Purpose |
+|--------|-----|------------|---------|
+| GET | `/` | `HomeController@index` | Home page |
+| GET | `/jobs` | `JobController@index` | Job listings |
+| GET | `/jobs/details/{id}` | `JobController@details` | Job details |
+| POST | `/apply-job` | `JobController@applyJob` | Apply for a job |
+| POST | `/save-job` | `JobController@saveJob` | Save a job |
 
-### Account Routes (Auth Required)
+### Account Routes (`/account`)
 
-| Method | URI | Description |
-|--------|-----|-------------|
-| GET | `/account/login` | Login page |
-| GET | `/account/register` | Registration page |
-| GET | `/account/profile` | User profile |
-| POST | `/account/update-profile` | Update profile info |
-| POST | `/account/update-profile-picture` | Update profile picture |
-| POST | `/account/update-password` | Change password |
-| GET | `/account/create-job` | Create job form |
-| POST | `/account/save-job` | Post a new job |
-| GET | `/account/my-jobs` | My posted jobs |
-| GET | `/account/my-applications` | My job applications |
-| GET | `/account/saved-jobs` | Saved jobs |
+#### Guest Only
+
+| Method | URI | Controller | Purpose |
+|--------|-----|------------|---------|
+| GET | `/account/login` | `AccountController@login` | Login page |
+| POST | `/account/authenticate` | `AccountController@authenticate` | Authenticate user |
+| GET | `/account/register` | `AccountController@registration` | Registration form |
+| POST | `/account/process-register` | `AccountController@processRegistration` | Process registration |
+
+#### Authenticated Only
+
+| Method | URI | Controller | Purpose |
+|--------|-----|------------|---------|
+| GET | `/account/profile` | `AccountController@profile` | View profile |
+| POST | `/account/update-profile` | `AccountController@updateProfile` | Update profile info |
+| POST | `/account/update-profile-picture` | `AccountController@updateProfilePicture` | Update profile picture |
+| POST | `/account/update-password` | `AccountController@changePassword` | Change password |
+| POST | `/account/logout` | `AccountController@logout` | Logout |
+
+#### Job Management (Employer)
+
+| Method | URI | Controller | Purpose |
+|--------|-----|------------|---------|
+| GET | `/account/create-job` | `AccountController@createJob` | Create job form |
+| POST | `/account/save-job` | `AccountController@saveJob` | Post new job |
+| GET | `/account/my-jobs` | `AccountController@myJobs` | View my jobs |
+| GET | `/account/my-jobs/edit/{jobId}` | `AccountController@editJob` | Edit job form |
+| POST | `/account/my-jobs/update/{jobId}` | `AccountController@updateJob` | Update job |
+| POST | `/account/my-jobs/delete` | `AccountController@deleteJob` | Delete job |
+
+#### Job Applications
+
+| Method | URI | Controller | Purpose |
+|--------|-----|------------|---------|
+| GET | `/account/my-applications` | `AccountController@myJobApplications` | View applications |
+| POST | `/account/remove-job-applications` | `AccountController@removeJobs` | Remove application |
+
+#### Saved Jobs
+
+| Method | URI | Controller | Purpose |
+|--------|-----|------------|---------|
+| GET | `/account/saved-jobs` | `AccountController@savedjobs` | View saved jobs |
+| POST | `/account/remove-saved-job` | `AccountController@removeSavedJob` | Remove saved job |
 
 ---
 
