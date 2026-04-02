@@ -14,6 +14,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs');
 Route::get('/jobs/details/{id}', [JobController::class, 'details'])->name('job.details');
 Route::post('/apply-job', [JobController::class, 'applyJob'])->name('applyJob');
+Route::post('/save-job', [JobController::class, 'saveJob'])->name('saveJob');
+
 
 Route::prefix('account')->group(function () {
 
@@ -31,14 +33,14 @@ Route::prefix('account')->group(function () {
         Route::post('/update-profile-picture', [AccountController::class, 'updateProfilePicture'])->name('account.updateProfilePicture');
     });
 
-        Route::get('/create-job', [AccountController::class, 'createJob'])->name('account.createJob');
-        Route::post('/save-job', [AccountController::class, 'saveJob'])->name('account.saveJob');
-        Route::get('/my-jobs', [AccountController::class, 'myJobs'])->name('account.myJobs');
-        Route::get('/my-jobs/edit/{jobId}', [AccountController::class, 'editJob'])->name('account.editJob');
-        Route::post('/my-jobs/update/{jobId}', [AccountController::class, 'updateJob'])->name('account.updateJob');
-        Route::post('/my-jobs/delete', [AccountController::class, 'deleteJob'])->name('account.deleteJob');
-        Route::get('/my-applications', [AccountController::class, 'myJobApplications'])->name('account.myJobApplications');
-        Route::post('/remove-job-applications', [AccountController::class, 'removeJobs'])->name('account.removeJobs');
-
+    Route::get('/create-job', [AccountController::class, 'createJob'])->name('account.createJob');
+    Route::post('/save-job', [AccountController::class, 'saveJob'])->name('account.saveJob');
+    Route::get('/my-jobs', [AccountController::class, 'myJobs'])->name('account.myJobs');
+    Route::get('/my-jobs/edit/{jobId}', [AccountController::class, 'editJob'])->name('account.editJob');
+    Route::post('/my-jobs/update/{jobId}', [AccountController::class, 'updateJob'])->name('account.updateJob');
+    Route::post('/my-jobs/delete', [AccountController::class, 'deleteJob'])->name('account.deleteJob');
+    Route::get('/my-applications', [AccountController::class, 'myJobApplications'])->name('account.myJobApplications');
+    Route::post('/remove-job-applications', [AccountController::class, 'removeJobs'])->name('account.removeJobs');
+    Route::get('/saved-jobs', [AccountController::class, 'savedjobs'])->name('account.savedJobs');
+    Route::post('/remove-saved-job', [AccountController::class, 'removeSavedJob'])->name('account.removeSavedJob');
 });
-

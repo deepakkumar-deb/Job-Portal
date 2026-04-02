@@ -38,11 +38,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="jobs_right">
-                                <div class="apply_now">
-                                    <a class="heart_mark" href="#"> <i class="fa fa-heart-o" aria-hidden="true"></i></a>
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div class="descript_wrap white-bg">
@@ -65,7 +60,12 @@
                         </div>
                         <div class="border-bottom"></div>
                         <div class="pt-3 text-end">
-                            <a href="#" class="btn btn-secondary">Save</a>
+                            @if(Auth::check())
+                            <a href="#" onclick="saveJob(event, {{ $job->id }})" class="btn btn-secondary">Save</a>
+                            @else
+                            <a href="{{ route('account.login') }}" class="btn btn-secondary">Save</a>
+                            @endif
+
                             @if(Auth::check())
                                 <a href="javascript:void(0)" onclick="applyJob(event, {{ $job->id }})" class="btn btn-primary">Apply</a>
                             @else
@@ -151,6 +151,32 @@ function applyJob(event, jobId) {
             }
         });
     }
+}
+
+function saveJob(event, jobId) {
+
+    event.preventDefault();
+
+    $.ajax({
+        url: '{{ route("saveJob") }}',
+        method: 'POST',
+        data: {
+            job_id:jobId,
+             _token: '{{ csrf_token() }}' },
+        dataType: 'json',
+        success: function(response) {
+            if(response.status) {
+                alert(response.message);
+                window.location.href = "{{ route('account.savedJobs') }}";
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function(xhr) {
+            // console.log(xhr.responseText);
+            alert('Server Error. Please try again later.');
+        }
+    });
 }
 </script>
 @endsection

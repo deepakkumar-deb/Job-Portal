@@ -23,10 +23,22 @@
 
             <div class="col-md-4 col-lg-3 sidebar mb-4">
                 <form action="" name="searchForm" id="searchForm">
+
                 <div class="card border-0 shadow p-4">
                     <div class="mb-4">
+                        <h2>Keywords</h2>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        name="keywords" 
+                        id="keywords" 
+                        placeholder="Job Title / Keywords"
+                        value="{{ request('keywords') }}"
+                    >
+                    </div>
+                    <div class="mb-4">
                         <h2>Location</h2>
-                        <input type="text" id="location" name="location" placeholder="Location" class="form-control">
+                        <input type="text" id="location" name="location" placeholder="Location" class="form-control" value="{{ request('location') }}">
                     </div>
 
                     <div class="mb-4">
@@ -36,7 +48,7 @@
 
                             @if ($categories->isNotEmpty())
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                 @endforeach
                             @endif
 
