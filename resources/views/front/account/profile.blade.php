@@ -61,31 +61,34 @@
 
                 <!-- Change Password Form -->
                 <div class="card border-0 shadow mb-4">
+                    <form action="{{ route('account.changePassword') }}" method="POST" id="passwordForm" name="passwordForm">
+                        @csrf
                     <div class="card-body p-4">
                         <h3 class="fs-4 mb-1">Change Password</h3>
 
                         <div class="mb-4">
                             <label for="old_password" class="mb-2">Old Password*</label>
-                            <input type="password" id="old_password" placeholder="Old Password" class="form-control">
+                            <input type="password" name="old_password" id="old_password" placeholder="Old Password" class="form-control">
                             <p></p>
                         </div>
 
                         <div class="mb-4">
                             <label for="new_password" class="mb-2">New Password*</label>
-                            <input type="password" id="new_password" placeholder="New Password" class="form-control">
+                            <input type="password" name="new_password" id="new_password" placeholder="New Password" class="form-control">
                             <p></p>
                         </div>
 
                         <div class="mb-4">
-                            <label for="confirm_password" class="mb-2">Confirm Password*</label>
-                            <input type="password" id="confirm_password" placeholder="Confirm Password" class="form-control">
+                            <label for="new_password_confirmation" class="mb-2">Confirm Password*</label>
+                            <input type="password" name="new_password_confirmation" id="new_password_confirmation" placeholder="Confirm Password" class="form-control">
                             <p></p>
                         </div>
                     </div>
 
                     <div class="card-footer p-4">
-                        <button type="button" class="btn btn-primary">Update</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -94,9 +97,8 @@
 @endsection
 
 @section('customJS')
-<script>
-    $(document).ready(function () {
-        $("#userForm").submit(function (e) {
+<script type="text/javascript">
+    $("#userForm").submit(function (e) {
             e.preventDefault();
 
             $('input').removeClass('is-invalid');
@@ -164,7 +166,67 @@
                     }
                 }
             });
-        });
     });
+
+
+    $("#passwordForm").submit(function (e) {
+            e.preventDefault();
+
+            $('input').removeClass('is-invalid');
+            $('#passwordForm p').removeClass('invalid-feedback').html('');
+
+            $.ajax({
+                url: "{{ route('account.changePassword') }}",
+                type: "POST",
+                dataType: "json",
+                data: $(this).serialize(),
+
+                success: function (response) {
+                    if (response.status) {
+                        $('#msg-container').html(`
+                            <div class="alert alert-success alert-dismissible fade show">
+                                ${response.message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                        
+                        $('#passwordForm')[0].reset();
+                    } else {
+                        $('#msg-container').html(`
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                ${response.message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                    }
+                },
+
+
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+
+                        if (errors.old_password) {
+                            $("#old_password").addClass('is-invalid')
+                                .siblings('p')
+                                .addClass('invalid-feedback')
+                                .html(errors.old_password[0]);
+                        }
+                        if (errors.new_password) {
+                            $("#new_password").addClass('is-invalid')
+                                .siblings('p')
+                                .addClass('invalid-feedback')
+                                .html(errors.new_password[0]);
+                        }
+                        if (errors.new_password_confirmation) {
+                            $("#new_password_confirmation").addClass('is-invalid')
+                                .siblings('p')
+                                .addClass('invalid-feedback')
+                                .html(errors.new_password_confirmation[0]);
+                        }
+                    }
+                }
+            });
+    }); 
 </script>
 @endsection

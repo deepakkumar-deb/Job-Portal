@@ -23,4 +23,9 @@ class JobApplication extends Model
     protected $casts = [
         'applied_date' => 'datetime', // ← add this
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

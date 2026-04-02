@@ -74,6 +74,49 @@
                         </div>
                     </div>
                 </div>
+                @if(Auth::user())
+                    @if(Auth::user()->id==$job->user_id)
+
+                <div class="card shadow border-0 mt-4">
+                    <div class="job_details_header">
+                        <div class="single_jobs white-bg d-flex justify-content-between">
+                            <div class="jobs_left d-flex align-items-center">
+                                
+                                <div class="jobs_conetent">
+                                    <a href="{{ route('job.details', $job->id) }}">
+                                        <h4>Applicants</h4>
+                                    </a>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="descript_wrap white-bg">
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Mobile</th>
+                                <th>Applied Date</th>
+                            </tr>
+                            <tr>
+                                @if($applications->isEmpty())
+                                    <td colspan="4" class="text-center">No applications found.</td>
+                                @else
+                                    @foreach($applications as $application)
+                                    <td>{{ $application->user->name }}</td>
+                                    <td>{{ $application->user->email }}</td>
+                                    <td>{{ $application->user->mobile }}</td>
+                                    <td>{{\Carbon\Carbon::parse($application->applied_date)->format('d M, Y') }}</td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+                        </table>
+                        
+                    </div>
+                </div>
+                    @endif
+                @endif
             </div>
             <div class="col-md-4">
                 <div class="card shadow border-0">

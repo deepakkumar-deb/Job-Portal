@@ -54,7 +54,9 @@ class JobController extends Controller
     {
         $job = Job::where('id', $id)->where('status', 1)->with('category', 'jobType')->firstOrFail();
 
-        return view('front.job_details', compact('job'));
+        $applications = JobApplication::where('job_id', $id)->with('user')->get(['id', 'user_id', 'applied_date']);
+
+        return view('front.job_details', compact('job', 'applications'));
     }
 
     public function applyJob(Request $request)
@@ -99,8 +101,6 @@ class JobController extends Controller
             'employer_id' => $job->user_id,
             'applied_date' => now()
         ]);
-
-
 
         //send email to employer about new application (optional)
         $employer = User::where('id', $job->user_id)->first();

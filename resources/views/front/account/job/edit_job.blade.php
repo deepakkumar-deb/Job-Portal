@@ -91,17 +91,17 @@
 
                             <div class="mb-4">
                                 <label class="mb-2">Description<span class="req">*</span></label>
-                                <textarea class="form-control" name="description" id="description" rows="5" placeholder="Description">{{$job->description}}</textarea>
+                                <textarea class="textarea" name="description" id="description" rows="5" placeholder="Description">{{$job->description}}</textarea>
                             </div>
 
                             <div class="mb-4">
                                 <label class="mb-2">Qualifications</label>
-                                <textarea class="form-control" name="qualifications" id="qualifications" rows="5" placeholder="Qualifications">{{$job->qualifications}}</textarea>
+                                <textarea class="textarea" name="qualifications" id="qualifications" rows="5" placeholder="Qualifications">{{$job->qualifications}}</textarea>
                             </div>
 
                             <div class="mb-4">
                                 <label class="mb-2">Experience</label>
-                                <textarea class="form-control" name="experience" id="experience" rows="5" placeholder="Experience">{{$job->experience}}</textarea>
+                                <textarea class="textarea" name="experience" id="experience" rows="5" placeholder="Experience">{{$job->experience}}</textarea>
                             </div>
 
                             <h3 class="fs-4 mb-1 mt-5 border-top pt-5">Company Details</h3>

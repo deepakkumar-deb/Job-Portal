@@ -393,5 +393,37 @@ class AccountController extends Controller
 
         session()->flash('success', 'Saved job removed successfully.');
         return response()->json(['status' => true]);
-    } 
+    }
+
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        if ($validator->passes()) {
+            $user = User::findOrFail(Auth::id());
+
+            if (!Hash::check($request->old_password, $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Old password is incorrect'
+                ], 400);
+            }
+
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Password changed successfully!'
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+    }
 }
